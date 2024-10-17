@@ -1,6 +1,6 @@
 # Diabetes Predictor
 
-🛠️  .<br>
+🛠️ This project assists in diabetes detection by analyzing a survey of patients' medical conditions. Using a **Random Forest regression** model, it identifies patterns, alerts users if they might have diabetes, and provides insights into potential causes.<br>
 <br><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" height="30" alt="javascript logo"  />
 <img width="12" />
 <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" height="30" alt="python logo"  />
