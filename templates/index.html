@@ -1,82 +1,904 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diabetes Predictor</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
-</head>
-<body>
-    <div class="theme-switch-wrapper">
-        <label class="theme-switch" for="checkbox">
-            <input type="checkbox" id="checkbox" />
-            <div class="slider round">
-                <i class="fas fa-sun"></i>
-                <i class="fas fa-moon"></i>
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Enhanced Diabetes Predictor{% endblock %}
+{% block nav_home %}active{% endblock %}
+
+{% block content %}
+<!-- Welcome Section -->
+<section class="mb-8">
+    <div class="bg-gradient-to-r from-medical-blue to-wellness-green text-white rounded-2xl p-8 shadow-xl">
+        <div class="flex flex-col lg:flex-row items-center justify-between">
+            <div class="lg:w-2/3 mb-6 lg:mb-0">
+                <h1 class="text-3xl lg:text-4xl font-bold mb-4">Welcome to Your Health Dashboard</h1>
+                <p class="text-blue-100 text-lg">Take control of your diabetes risk with AI-powered predictions, personalized recommendations, and gamified health tracking.</p>
+                <div class="mt-6 flex flex-col sm:flex-row gap-4">
+                    <a href="/prediction-form" class="inline-block bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-all duration-200 transform hover:scale-105">
+                        🔍 Start Risk Assessment
+                    </a>
+                    <button onclick="showHealthTasks()" class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all duration-200 transform hover:scale-105">
+                        📋 Track Daily Goals
+                    </button>
+                </div>
             </div>
-        </label>
-    </div>
-    <div class="container">
-        <h1>Diabetes Predictor</h1>
-        <form id="prediction-form">
-            <div class="form-group">
-                <label for="gender">Gender:</label>
-                <select id="gender" required>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                </select>
+            <div class="lg:w-1/3 text-center">
+                <div class="text-6xl animate-bounce-subtle">🏥</div>
+                <p class="text-blue-100 mt-2">Your Health Partner</p>
             </div>
-            <div class="form-group">
-                <label for="age">Age:</label>
-                <input type="number" id="age" required min="0" max="120">
-            </div>
-            <div class="form-group">
-                <label for="hypertension">Hypertension:</label>
-                <select id="hypertension" required>
-                    <option value="0">No</option>
-                    <option value="1">Yes</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="heart_disease">Heart Disease:</label>
-                <select id="heart_disease" required>
-                    <option value="0">No</option>
-                    <option value="1">Yes</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="smoking_history">Smoking History:</label>
-                <select id="smoking_history" required>
-                    <option value="never">Never</option>
-                    <option value="former">Former</option>
-                    <option value="current">Current</option>
-                    <option value="not current">Not Current</option>
-                    <option value="ever">Ever</option>
-                    <option value="No Info">No Info</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="bmi">BMI:</label>
-                <input type="number" id="bmi" required min="10" max="50" step="0.1">
-            </div>
-            <div class="form-group">
-                <label for="HbA1c_level">HbA1c Level:</label>
-                <input type="number" id="HbA1c_level" required min="3" max="9" step="0.1">
-            </div>
-            <div class="form-group">
-                <label for="blood_glucose_level">Blood Glucose Level:</label>
-                <input type="number" id="blood_glucose_level" required min="70" max="300">
-            </div>
-            <button type="submit">Predict</button>
-        </form>
-        <div id="result" class="hidden">
-            <h2>Prediction Result</h2>
-            <p>Chance of having diabetes: <span id="prediction"></span></p>
-            <h3>Top factors:</h3>
-            <ul id="top-factors"></ul>
         </div>
     </div>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
-</body>
-</html>
+</section>
+
+<!-- Health Stats Overview -->
+<section class="mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Health Score Card -->
+        <div class="glassmorphism rounded-xl p-6 card-hover">
+            <div class="flex items-center justify-between mb-4">
+                <div class="text-3xl">⭐</div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold text-gray-900" id="health-score" data-health-score="{{ stats.health_score or 0 }}">
+                        {{ stats.health_score or 0 }}
+                    </div>
+                    <div class="text-sm text-gray-500">Health Score</div>
+                </div>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-3">
+                <div class="bg-gradient-to-r from-wellness-green to-medical-blue h-3 rounded-full transition-all duration-1000" 
+                     style="width: {{ stats.health_score or 0 }}%"></div>
+            </div>
+            <div class="mt-2 text-xs text-gray-600 text-center">
+                {% if stats.health_score >= 80 %}
+                    Excellent! Keep it up!
+                {% elif stats.health_score >= 60 %}
+                    Good progress!
+                {% elif stats.health_score >= 40 %}
+                    Getting better!
+                {% else %}
+                    Let's improve together!
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Current Streak Card -->
+        <div class="glassmorphism rounded-xl p-6 card-hover">
+            <div class="flex items-center justify-between mb-4">
+                <div class="text-3xl">🔥</div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold text-gray-900" id="current-streak" data-streak="daily_tasks">
+                        {{ stats.current_streak or 0 }}
+                    </div>
+                    <div class="text-sm text-gray-500">Day Streak</div>
+                </div>
+            </div>
+            <div class="text-xs text-gray-600 text-center">
+                {% if stats.current_streak >= 30 %}
+                    🏆 Legendary streak!
+                {% elif stats.current_streak >= 14 %}
+                    🔥 On fire!
+                {% elif stats.current_streak >= 7 %}
+                    ⚡ Great momentum!
+                {% else %}
+                    💪 Keep going strong!
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Total Predictions Card -->
+        <div class="glassmorphism rounded-xl p-6 card-hover">
+            <div class="flex items-center justify-between mb-4">
+                <div class="text-3xl">🔍</div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold text-gray-900" id="total-predictions">
+                        {{ stats.total_predictions or 0 }}
+                    </div>
+                    <div class="text-sm text-gray-500">Assessments</div>
+                </div>
+            </div>
+            <div class="text-xs text-gray-600 text-center">Track your progress</div>
+        </div>
+
+        <!-- Risk Status Card -->
+        <div class="glassmorphism rounded-xl p-6 card-hover">
+            <div class="flex items-center justify-between mb-4">
+                <div class="text-3xl">📊</div>
+                <div class="text-right">
+                    <div class="text-lg font-semibold text-gray-900" id="risk-status">
+                        {% if stats.recent_predictions %}
+                            {% set latest = stats.recent_predictions[0] %}
+                            {% if latest.risk_analysis and latest.risk_analysis.overall_risk_level %}
+                                <span class="risk-{{ latest.risk_analysis.overall_risk_level }}">
+                                    {{ latest.risk_analysis.overall_risk_level|title }} Risk
+                                </span>
+                            {% else %}
+                                Unknown Risk
+                            {% endif %}
+                        {% else %}
+                            No Assessment
+                        {% endif %}
+                    </div>
+                    <div class="text-sm text-gray-500">Current Status</div>
+                </div>
+            </div>
+            <div class="text-xs text-gray-600 text-center">
+                {% if stats.recent_predictions %}
+                    Latest assessment
+                {% else %}
+                    Complete first assessment
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Main Dashboard Content -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Left Column - Charts and Analysis -->
+    <div class="lg:col-span-2 space-y-8">
+        <!-- Risk Trend Chart -->
+        <div class="glassmorphism rounded-xl p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">📈 Health Trend Analysis</h3>
+                <div class="flex space-x-2">
+                    <button onclick="updateChartPeriod('week')" class="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors duration-200">
+                        Week
+                    </button>
+                    <button onclick="updateChartPeriod('month')" class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200">
+                        Month
+                    </button>
+                </div>
+            </div>
+            <div class="relative">
+                <canvas id="risk-trend-chart" height="300"></canvas>
+                <div id="chart-no-data" class="{% if not stats.recent_predictions %}flex{% else %}hidden{% endif %} absolute inset-0 items-center justify-center bg-gray-50 rounded-lg">
+                    <div class="text-center text-gray-500">
+                        <div class="text-6xl mb-4">📊</div>
+                        <h4 class="text-lg font-semibold mb-2">No Data Yet</h4>
+                        <p class="text-sm mb-4">Complete a risk assessment to see your trend analysis</p>
+                        <a href="/prediction-form" class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                            Start Assessment
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Risk Factors Radar Chart -->
+        <div class="glassmorphism rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">🎯 Risk Factors Analysis</h3>
+            <div class="relative">
+                <canvas id="risk-factors-chart" height="300"></canvas>
+                <div id="risk-factors-no-data" class="{% if not stats.recent_predictions %}flex{% else %}hidden{% endif %} absolute inset-0 items-center justify-center bg-gray-50 rounded-lg">
+                    <div class="text-center text-gray-500">
+                        <div class="text-4xl mb-2">🎯</div>
+                        <p class="text-sm">Complete an assessment to see your risk factor breakdown</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Health Insights -->
+        <div class="glassmorphism rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">💡 Personalized Insights</h3>
+            <div id="health-insights" class="space-y-4">
+                {% if stats.recent_predictions %}
+                    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <div class="text-blue-400 text-xl">📈</div>
+                            </div>
+                            <div class="ml-3">
+                                <h4 class="text-sm font-medium text-blue-800">Latest Assessment Complete</h4>
+                                <p class="mt-1 text-sm text-blue-700">
+                                    Your latest risk assessment shows {{ stats.recent_predictions[0].risk_analysis.overall_risk_level if stats.recent_predictions[0].risk_analysis else 'unknown' }} risk level. 
+                                    Continue tracking your health metrics for better insights.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <div class="text-blue-400 text-xl">💡</div>
+                            </div>
+                            <div class="ml-3">
+                                <h4 class="text-sm font-medium text-blue-800">Welcome to HealthPredict!</h4>
+                                <p class="mt-1 text-sm text-blue-700">
+                                    Complete your first diabetes risk assessment to receive personalized health insights and recommendations tailored just for you.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <div class="text-green-400 text-xl">🏃</div>
+                        </div>
+                        <div class="ml-3">
+                            <h4 class="text-sm font-medium text-green-800">Stay Active Daily</h4>
+                            <p class="mt-1 text-sm text-green-700">
+                                Regular physical activity is one of the most effective ways to reduce diabetes risk. Aim for at least 150 minutes of moderate activity per week.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <div class="text-yellow-400 text-xl">🍎</div>
+                        </div>
+                        <div class="ml-3">
+                            <h4 class="text-sm font-medium text-yellow-800">Nutrition Matters</h4>
+                            <p class="mt-1 text-sm text-yellow-700">
+                                A balanced diet rich in vegetables, whole grains, and lean proteins can significantly impact your health. Track your daily nutrition goals!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="glassmorphism rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">📝 Recent Activity</h3>
+            <div id="recent-activity">
+                {% if stats.recent_predictions %}
+                    <div class="space-y-4">
+                        {% for prediction in stats.recent_predictions %}
+                        <div class="border-l-4 border-blue-400 pl-4 py-3 bg-blue-50 rounded-r-lg">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">✅ Risk Assessment Completed</p>
+                                    <p class="text-xs text-gray-500 mt-1">{{ prediction.created_at }}</p>
+                                    {% if prediction.risk_analysis and prediction.risk_analysis.individual_factors %}
+                                        <p class="text-xs text-gray-600 mt-1">
+                                            Key factors: 
+                                            {% for factor, analysis in prediction.risk_analysis.individual_factors.items() %}
+                                                {% if analysis.risk_score > 0.5 %}{{ factor }}{% if not loop.last %}, {% endif %}{% endif %}
+                                            {% endfor %}
+                                        </p>
+                                    {% endif %}
+                                </div>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                    {% if prediction.risk_analysis %}
+                                        {% if prediction.risk_analysis.overall_risk_level == 'low' %}bg-green-100 text-green-800
+                                        {% elif prediction.risk_analysis.overall_risk_level == 'moderate' %}bg-yellow-100 text-yellow-800
+                                        {% elif prediction.risk_analysis.overall_risk_level == 'high' %}bg-orange-100 text-orange-800
+                                        {% else %}bg-red-100 text-red-800{% endif %}
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {% if prediction.risk_analysis %}
+                                        {{ prediction.risk_analysis.overall_risk_level|title }}
+                                    {% else %}
+                                        Unknown
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center text-gray-500 py-12">
+                        <div class="text-6xl mb-4">📋</div>
+                        <h4 class="text-lg font-semibold mb-2">No Recent Activity</h4>
+                        <p class="text-sm mb-4">Start your health journey by completing your first assessment</p>
+                        <a href="/prediction-form" class="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                            Get Started
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column - Quick Actions and Tips -->
+    <div class="space-y-6">
+        <!-- Quick Actions -->
+        <div class="glassmorphism rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">⚡ Quick Actions</h3>
+            <div class="space-y-3">
+                <button onclick="window.location.href='/prediction-form'" 
+                        class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white p-3 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <div class="flex items-center justify-center">
+                        <span class="mr-2 text-xl">🔍</span>
+                        <span class="font-medium">New Risk Assessment</span>
+                    </div>
+                </button>
+                
+                <button onclick="showHealthTasks()" 
+                        class="w-full bg-gradient-to-r from-green-600 to-green-700 text-white p-3 rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <div class="flex items-center justify-center">
+                        <span class="mr-2 text-xl">📋</span>
+                        <span class="font-medium">Daily Health Tasks</span>
+                    </div>
+                </button>
+                
+                <button onclick="showAIChat()" 
+                        class="w-full bg-gradient-to-r from-purple-600 to-purple-700 text-white p-3 rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <div class="flex items-center justify-center">
+                        <span class="mr-2 text-xl">🤖</span>
+                        <span class="font-medium">Ask AI Assistant</span>
+                    </div>
+                </button>
+                
+                <button onclick="exportUserData()" 
+                        class="w-full bg-gradient-to-r from-orange-600 to-orange-700 text-white p-3 rounded-lg hover:from-orange-700 hover:to-orange-800 transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    <div class="flex items-center justify-center">
+                        <span class="mr-2 text-xl">📊</span>
+                        <span class="font-medium">Export Health Data</span>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Daily Health Tip -->
+        <div class="glassmorphism rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">💊 Daily Health Tip</h3>
+            <div id="health-tip" class="bg-gradient-to-r from-blue-50 to-green-50 p-4 rounded-lg">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <span class="text-2xl" id="tip-icon">💡</span>
+                    </div>
+                    <div class="ml-3">
+                        <h4 class="text-sm font-medium text-gray-900" id="tip-title">Stay Hydrated</h4>
+                        <p class="mt-1 text-sm text-gray-700" id="tip-content">
+                            Drinking water helps regulate blood sugar levels and supports overall metabolism. Aim for 8 glasses per day to maintain optimal health.
+                        </p>
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mt-2" id="tip-category">
+                            nutrition
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-3 text-center">
+                <button onclick="loadNewHealthTip()" class="text-sm text-blue-600 hover:text-blue-700 transition-colors duration-200">
+                    Get New Tip
+                </button>
+            </div>
+        </div>
+
+        <!-- Achievement Showcase -->
+        <div class="glassmorphism rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">🏆 Recent Achievements</h3>
+            <div id="recent-achievements" class="space-y-3">
+                <div class="text-center text-gray-500 py-6">
+                    <div class="text-4xl mb-2">🎯</div>
+                    <p class="text-sm">Complete health tasks to earn achievements</p>
+                    <button onclick="showHealthTasks()" class="mt-2 text-blue-600 hover:text-blue-700 text-sm transition-colors duration-200">
+                        Start Tracking
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Health Score Breakdown -->
+        <div class="glassmorphism rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">📊 Health Score Breakdown</h3>
+            <div class="space-y-4">
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm text-gray-600">Task Completion</span>
+                        <span class="text-sm font-medium" id="task-completion-percent">40%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-green-500 h-2 rounded-full transition-all duration-1000" style="width: 40%" id="task-completion-bar"></div>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm text-gray-600">Consistency</span>
+                        <span class="text-sm font-medium" id="consistency-percent">25%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-blue-500 h-2 rounded-full transition-all duration-1000" style="width: 25%" id="consistency-bar"></div>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm text-gray-600">Streak Bonus</span>
+                        <span class="text-sm font-medium" id="streak-bonus-percent">15%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-purple-500 h-2 rounded-full transition-all duration-1000" style="width: 15%" id="streak-bonus-bar"></div>
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-gray-200">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-gray-900">Overall Health Score</span>
+                        <span class="text-lg font-bold text-blue-600" id="overall-health-score">{{ stats.health_score or 0 }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="glassmorphism rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">📈 Quick Stats</h3>
+            <div class="grid grid-cols-2 gap-4 text-center">
+                <div class="bg-blue-50 p-3 rounded-lg">
+                    <div class="text-2xl font-bold text-blue-600" id="week-completion">85%</div>
+                    <div class="text-xs text-blue-700">Week Completion</div>
+                </div>
+                <div class="bg-green-50 p-3 rounded-lg">
+                    <div class="text-2xl font-bold text-green-600" id="total-points">1,250</div>
+                    <div class="text-xs text-green-700">Total Points</div>
+                </div>
+                <div class="bg-purple-50 p-3 rounded-lg">
+                    <div class="text-2xl font-bold text-purple-600" id="current-level">5</div>
+                    <div class="text-xs text-purple-700">Current Level</div>
+                </div>
+                <div class="bg-orange-50 p-3 rounded-lg">
+                    <div class="text-2xl font-bold text-orange-600" id="best-streak">12</div>
+                    <div class="text-xs text-orange-700">Best Streak</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Action Button -->
+<div class="fixed bottom-6 right-6 z-40">
+    <button onclick="showAIChat()" 
+            class="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            title="Open AI Health Assistant (Alt+C)">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+        </svg>
+    </button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load dashboard data
+    loadDashboardData();
+    
+    // Load daily health tip
+    loadDailyHealthTip();
+    
+    // Initialize charts
+    initializeCharts();
+    
+    // Load recent achievements
+    loadRecentAchievements();
+    
+    // Set up periodic updates every 5 minutes
+    setInterval(loadDashboardData, 300000);
+    
+    // Animate counters on load
+    animateCounters();
+});
+
+function loadDashboardData() {
+    // Load health trends
+    fetch('/api/charts/trends?days=30')
+        .then(response => response.json())
+        .then(data => {
+            updateTrendChart(data);
+        })
+        .catch(error => {
+            console.log('Trend data not available yet');
+            document.getElementById('chart-no-data').classList.remove('hidden');
+        });
+    
+    // Load risk factors chart
+    fetch('/api/charts/risk-factors')
+        .then(response => response.json())
+        .then(data => {
+            updateRiskFactorsChart(data);
+        })
+        .catch(error => {
+            console.log('Risk factors data not available yet');
+            document.getElementById('risk-factors-no-data').classList.remove('hidden');
+        });
+    
+    // Load gamification stats
+    fetch('/api/gamification/stats')
+        .then(response => response.json())
+        .then(data => {
+            updateGamificationStats(data);
+            if (data.recent_achievements && data.recent_achievements.length > 0) {
+                updateAchievementsDisplay(data.recent_achievements);
+            }
+        })
+        .catch(error => {
+            console.log('Gamification stats not available yet');
+        });
+}
+
+function updateGamificationStats(data) {
+    if (data.current_streak !== undefined) {
+        document.getElementById('current-streak').textContent = data.current_streak;
+    }
+    
+    if (data.health_score !== undefined) {
+        const scoreElement = document.getElementById('health-score');
+        const currentScore = parseInt(scoreElement.textContent) || 0;
+        const newScore = Math.round(data.health_score);
+        
+        // Animate score change
+        animateValue(scoreElement, currentScore, newScore);
+        
+        // Update progress bar
+        const progressBar = document.querySelector('.bg-gradient-to-r.from-wellness-green');
+        if (progressBar) {
+            progressBar.style.width = newScore + '%';
+        }
+        
+        // Update overall health score
+        const overallScore = document.getElementById('overall-health-score');
+        if (overallScore) {
+            overallScore.textContent = newScore;
+        }
+    }
+    
+    // Update health score breakdown
+    if (data.score_breakdown) {
+        updateHealthScoreBreakdown(data.score_breakdown);
+    }
+    
+    // Update quick stats
+    updateQuickStats(data);
+}
+
+function updateHealthScoreBreakdown(breakdown) {
+    const components = ['task-completion', 'consistency', 'streak-bonus'];
+    
+    components.forEach(component => {
+        const percentElement = document.getElementById(component + '-percent');
+        const barElement = document.getElementById(component + '-bar');
+        
+        if (breakdown[component] !== undefined && percentElement && barElement) {
+            const value = Math.round(breakdown[component]);
+            percentElement.textContent = value + '%';
+            barElement.style.width = value + '%';
+        }
+    });
+}
+
+function updateQuickStats(data) {
+    if (data.weekly_completion_rate !== undefined) {
+        const weekElement = document.getElementById('week-completion');
+        if (weekElement) {
+            weekElement.textContent = Math.round(data.weekly_completion_rate * 100) + '%';
+        }
+    }
+    
+    if (data.total_points !== undefined) {
+        const pointsElement = document.getElementById('total-points');
+        if (pointsElement) {
+            pointsElement.textContent = data.total_points.toLocaleString();
+        }
+    }
+    
+    if (data.level !== undefined) {
+        const levelElement = document.getElementById('current-level');
+        if (levelElement) {
+            levelElement.textContent = data.level;
+        }
+    }
+    
+    if (data.best_streak !== undefined) {
+        const streakElement = document.getElementById('best-streak');
+        if (streakElement) {
+            streakElement.textContent = data.best_streak;
+        }
+    }
+}
+
+function updateAchievementsDisplay(achievements) {
+    const container = document.getElementById('recent-achievements');
+    container.innerHTML = '';
+    
+    if (achievements.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-gray-500 py-6">
+                <div class="text-4xl mb-2">🎯</div>
+                <p class="text-sm">Complete health tasks to earn achievements</p>
+                <button onclick="showHealthTasks()" class="mt-2 text-blue-600 hover:text-blue-700 text-sm transition-colors duration-200">
+                    Start Tracking
+                </button>
+            </div>
+        `;
+        return;
+    }
+    
+    achievements.slice(0, 3).forEach(achievement => {
+        const achievementEl = document.createElement('div');
+        achievementEl.className = 'flex items-center p-3 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border border-yellow-200';
+        achievementEl.innerHTML = `
+            <span class="text-2xl mr-3">${achievement.icon}</span>
+            <div class="flex-1">
+                <div class="text-sm font-medium text-gray-900">${achievement.title}</div>
+                <div class="text-xs text-gray-600">${achievement.description}</div>
+                <div class="text-xs text-orange-600 mt-1">+${achievement.points} points</div>
+            </div>
+        `;
+        container.appendChild(achievementEl);
+    });
+}
+
+function updateTrendChart(data) {
+    if (window.chartRenderer) {
+        const chartData = {
+            dates: data.daily_completion ? data.daily_completion.map(d => 
+                new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+            ) : [],
+            riskScores: data.risk_trend ? data.risk_trend.map(r => r.risk_score * 100) : [],
+            healthScores: data.daily_completion ? data.daily_completion.map(d => d.completion_rate * 100) : []
+        };
+        
+        if (chartData.dates.length > 0) {
+            document.getElementById('chart-no-data').classList.add('hidden');
+            window.chartRenderer.createRiskTrendChart('risk-trend-chart', chartData);
+        }
+    }
+}
+
+function updateRiskFactorsChart(data) {
+    if (window.chartRenderer && data.radar_chart) {
+        document.getElementById('risk-factors-no-data').classList.add('hidden');
+        window.chartRenderer.createRiskFactorsRadarChart('risk-factors-chart', data.radar_chart);
+    }
+}
+
+function animateCounters() {
+    const counters = document.querySelectorAll('#health-score, #current-streak, #total-predictions');
+    
+    counters.forEach(counter => {
+        const target = parseInt(counter.textContent) || 0;
+        animateValue(counter, 0, target, 1500);
+    });
+}
+
+function animateValue(element, start, end, duration = 1000) {
+    if (start === end) return;
+    
+    const range = end - start;
+    const increment = range / (duration / 16);
+    let current = start;
+    
+    const timer = setInterval(() => {
+        current += increment;
+        
+        if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
+            element.textContent = Math.round(end);
+            clearInterval(timer);
+        } else {
+            element.textContent = Math.round(current);
+        }
+    }, 16);
+}
+
+function updateChartPeriod(period) {
+    const days = period === 'week' ? 7 : 30;
+    
+    fetch(`/api/charts/trends?days=${days}`)
+        .then(response => response.json())
+        .then(data => {
+            updateTrendChart(data);
+            
+            // Update button states
+            document.querySelectorAll('button[onclick^="updateChartPeriod"]').forEach(btn => {
+                btn.className = btn.onclick.toString().includes(period) ? 
+                    'px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg' :
+                    'px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200';
+            });
+        })
+        .catch(error => {
+            console.error('Error updating chart period:', error);
+            showToast('Failed to update chart', 'error');
+        });
+}
+
+function loadDailyHealthTip() {
+    const tips = [
+        {
+            title: 'Stay Hydrated',
+            content: 'Drinking water helps regulate blood sugar levels and supports overall metabolism. Aim for 8 glasses per day.',
+            category: 'nutrition',
+            icon: '💧'
+        },
+        {
+            title: 'Walk After Meals',
+            content: 'A 10-15 minute walk after eating can help lower blood sugar spikes and improve digestion.',
+            category: 'exercise',
+            icon: '🚶'
+        },
+        {
+            title: 'Get Quality Sleep',
+            content: 'Poor sleep can affect hormone levels and increase diabetes risk. Aim for 7-9 hours nightly.',
+            category: 'lifestyle',
+            icon: '😴'
+        },
+        {
+            title: 'Manage Stress',
+            content: 'Chronic stress can raise blood sugar levels. Try deep breathing, meditation, or yoga daily.',
+            category: 'wellness',
+            icon: '🧘'
+        },
+        {
+            title: 'Choose Whole Grains',
+            content: 'Whole grains provide steady energy and better blood sugar control than refined grains.',
+            category: 'nutrition',
+            icon: '🌾'
+        },
+        {
+            title: 'Monitor Portion Sizes',
+            content: 'Using smaller plates and measuring portions can help control calorie intake and blood sugar.',
+            category: 'nutrition',
+            icon: '🍽️'
+        }
+    ];
+
+    const randomTip = tips[Math.floor(Math.random() * tips.length)];
+    updateHealthTip(randomTip);
+}
+
+function loadNewHealthTip() {
+    loadDailyHealthTip();
+    showToast('New health tip loaded!', 'info');
+}
+
+function updateHealthTip(tip) {
+    document.getElementById('tip-title').textContent = tip.title;
+    document.getElementById('tip-content').textContent = tip.content;
+    document.getElementById('tip-category').textContent = tip.category;
+    document.getElementById('tip-icon').textContent = tip.icon;
+}
+
+function initializeCharts() {
+    // Initialize Chart.js with default configurations
+    if (typeof Chart !== 'undefined') {
+        Chart.defaults.responsive = true;
+        Chart.defaults.maintainAspectRatio = false;
+    }
+}
+
+function loadRecentAchievements() {
+    fetch('/api/gamification/stats')
+        .then(response => response.json())
+        .then(data => {
+            if (data.recent_achievements && data.recent_achievements.length > 0) {
+                updateAchievementsDisplay(data.recent_achievements);
+            }
+        })
+        .catch(error => {
+            console.log('No achievements data available yet');
+        });
+}
+
+// Intersection Observer for animations
+function setupAnimationObserver() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-fade-in');
+            }
+        });
+    });
+    
+    document.querySelectorAll('.glassmorphism').forEach(el => {
+        observer.observe(el);
+    });
+}
+
+// Initialize animations on load
+document.addEventListener('DOMContentLoaded', function() {
+    setupAnimationObserver();
+    
+    // Add hover effects to cards
+    document.querySelectorAll('.card-hover').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+});
+
+// Keyboard shortcuts info
+function showKeyboardShortcuts() {
+    showToast('Keyboard shortcuts: Alt+H (Health Tasks), Alt+C (AI Chat), Alt+T (Toggle Theme)', 'info', 8000);
+}
+
+// Add keyboard shortcut info on first visit
+function checkFirstVisit() {
+    try {
+        if (!localStorage.getItem('keyboard-shortcuts-shown')) {
+            setTimeout(() => {
+                showKeyboardShortcuts();
+                localStorage.setItem('keyboard-shortcuts-shown', 'true');
+            }, 3000);
+        }
+    } catch (error) {
+        // localStorage not available, skip
+        console.log('localStorage not available for shortcuts info');
+    }
+}
+
+// Initialize first visit check
+document.addEventListener('DOMContentLoaded', checkFirstVisit);
+</script>
+
+<!-- Add some custom animations -->
+<style>
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+}
+
+.risk-low { color: #10B981; }
+.risk-moderate { color: #F59E0B; }
+.risk-high { color: #F97316; }
+.risk-very_high { color: #EF4444; }
+
+.card-hover {
+    transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* Progress bar animations */
+.bg-gradient-to-r {
+    transition: width 1s ease-in-out;
+}
+
+/* Pulse animation for health score */
+#health-score {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .text-3xl.lg\\:text-4xl {
+        font-size: 1.875rem;
+    }
+    
+    .p-8 {
+        padding: 1.5rem;
+    }
+    
+    .gap-6 {
+        gap: 1rem;
+    }
+}
+
+/* Bounce animation for welcome icon */
+@keyframes bounce-subtle {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+.animate-bounce-subtle {
+    animation: bounce-subtle 3s ease-in-out infinite;
+}
+</style>
+{% endblock %}
