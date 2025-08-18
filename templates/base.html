@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Enhanced Diabetes Predictor{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'medical-blue': '#3B82F6',
+                        'wellness-green': '#10B981',
+                        'warning-orange': '#F59E0B',
+                        'danger-red': '#EF4444'
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'bounce-subtle': 'bounceSubtle 2s infinite'
+                    },
+                    backdropBlur: {
+                        'xs': '2px'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
+    
+    {% block head %}{% endblock %}
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+    <!-- Navigation -->
+    <nav class="bg-white/80 backdrop-blur-md border-b border-blue-100 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <span class="text-2xl">🏥</span>
+                        <span class="ml-2 text-xl font-bold text-gray-900">HealthPredict</span>
+                    </div>
+                </div>
+                
+                <!-- Navigation Links -->
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="/" class="nav-link {% block nav_home %}{% endblock %}">
+                            Dashboard
+                        </a>
+                        <a href="/prediction-form" class="nav-link {% block nav_predict %}{% endblock %}">
+                            Risk Assessment
+                        </a>
+                        <a href="#" class="nav-link" onclick="showHealthTasks()">
+                            Health Tracking
+                        </a>
+                        <a href="#" class="nav-link" onclick="showAIChat()">
+                            AI Assistant
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Mobile menu button -->
+                <div class="md:hidden">
+                    <button type="button" class="mobile-menu-button">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Theme Toggle -->
+                <div class="ml-4">
+                    <button id="theme-toggle" class="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors duration-200">
+                        <span class="dark:hidden">🌙</span>
+                        <span class="hidden dark:inline">☀️</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile menu -->
+        <div class="md:hidden mobile-menu hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
+                <a href="/" class="mobile-nav-link">Dashboard</a>
+                <a href="/prediction-form" class="mobile-nav-link">Risk Assessment</a>
+                <a href="#" class="mobile-nav-link" onclick="showHealthTasks()">Health Tracking</a>
+                <a href="#" class="mobile-nav-link" onclick="showAIChat()">AI Assistant</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div class="bg-white rounded-xl p-8 max-w-sm mx-4 text-center shadow-2xl">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p class="text-gray-700 font-medium">Processing your health data...</p>
+        </div>
+    </div>
+
+    <!-- Health Tasks Modal -->
+    <div id="health-tasks-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl">
+            <div class="bg-gradient-to-r from-wellness-green to-medical-blue text-white p-6">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold">Daily Health Tasks</h2>
+                    <button onclick="closeModal('health-tasks-modal')" class="text-white hover:text-gray-200 text-xl">✕</button>
+                </div>
+            </div>
+            <div class="p-6 overflow-y-auto">
+                <div id="health-tasks-content">
+                    <!-- Health tasks will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Chat Modal -->
+    <div id="ai-chat-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden shadow-2xl">
+            <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-6">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold">AI Health Assistant</h2>
+                    <button onclick="closeModal('ai-chat-modal')" class="text-white hover:text-gray-200 text-xl">✕</button>
+                </div>
+            </div>
+            <div class="flex flex-col h-96">
+                <div id="chat-messages" class="flex-1 p-4 overflow-y-auto bg-gray-50">
+                    <div class="ai-message">
+                        <div class="bg-blue-100 text-blue-800 p-3 rounded-lg">
+                            Hello! I'm your AI health assistant. I can help answer questions about diabetes prevention, explain your risk results, and provide personalized health guidance. What would you like to know?
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 border-t">
+                    <div class="flex space-x-2">
+                        <input type="text" id="chat-input" placeholder="Ask me about your health..." 
+                               class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button onclick="sendChatMessage()" 
+                                class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                            Send
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="fixed top-4 right-4 z-60 space-y-2">
+        <!-- Toast notifications will be added here dynamically -->
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/gamification.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/form-wizard.js') }}"></script>
+    
+    {% block scripts %}{% endblock %}
+
+    <!-- Initialize App -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the application
+            HealthPredict.init();
+            
+            // Mobile menu toggle
+            const mobileMenuButton = document.querySelector('.mobile-menu-button');
+            const mobileMenu = document.querySelector('.mobile-menu');
+            
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+            
+            // Theme toggle
+            const themeToggle = document.getElementById('theme-toggle');
+            if (themeToggle) {
+                themeToggle.addEventListener('click', function() {
+                    document.documentElement.classList.toggle('dark');
+                    localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+                });
+                
+                // Load saved theme
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                }
+            }
+        });
+    </script>
+
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes bounceSubtle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .nav-link {
+            @apply px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200;
+        }
+        
+        .nav-link.active {
+            @apply text-blue-600 bg-blue-50;
+        }
+        
+        .mobile-nav-link {
+            @apply block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200;
+        }
+        
+        .card-hover {
+            @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+        }
+        
+        .glassmorphism {
+            @apply bg-white/80 backdrop-blur-sm border border-white/20;
+        }
+        
+        .ai-message {
+            @apply mb-4;
+        }
+        
+        .user-message {
+            @apply mb-4 flex justify-end;
+        }
+        
+        .user-message .bg-blue-600 {
+            @apply bg-blue-600 text-white p-3 rounded-lg max-w-xs;
+        }
+    </style>
+</body>
+</html>
