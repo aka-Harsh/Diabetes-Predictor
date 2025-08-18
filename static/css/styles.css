@@ -1,0 +1,523 @@
+/* Enhanced Diabetes Predictor - Custom Styles */
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Root Variables */
+:root {
+  --primary-blue: #3B82F6;
+  --wellness-green: #10B981;
+  --warning-orange: #F59E0B;
+  --danger-red: #EF4444;
+  --dark-gray: #1F2937;
+  --light-gray: #F9FAFB;
+  --transition-duration: 0.2s;
+}
+
+/* Global Styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
+  color: #374151;
+  background: linear-gradient(135deg, #EBF8FF 0%, #F0FDF4 100%);
+  min-height: 100vh;
+}
+
+/* Glassmorphism Effect */
+.glassmorphism {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+}
+
+/* Dark mode glassmorphism */
+.dark .glassmorphism {
+  background: rgba(31, 41, 55, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(156, 163, 175, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.3);
+  border-radius: 4px;
+  transition: background var(--transition-duration);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.5);
+}
+
+/* Enhanced Form Styles */
+.form-input {
+  @apply w-full px-4 py-3 border border-gray-300 rounded-lg transition-all duration-200;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+}
+
+.form-input:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.form-input.error {
+  @apply border-red-500 bg-red-50;
+}
+
+/* Custom Radio Buttons */
+.radio-group input[type="radio"] {
+  @apply sr-only;
+}
+
+.radio-group label {
+  @apply flex items-center px-4 py-3 border border-gray-300 rounded-lg cursor-pointer transition-all duration-200;
+  @apply hover:border-blue-300 hover:bg-blue-50;
+}
+
+.radio-group input[type="radio"]:checked + label {
+  @apply border-blue-500 bg-blue-50 text-blue-700 ring-2 ring-blue-200;
+}
+
+/* Custom Range Slider */
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(to right, #10B981 0%, #F59E0B 50%, #EF4444 100%);
+  outline: none;
+  transition: opacity 0.2s;
+}
+
+input[type="range"]:hover {
+  opacity: 0.8;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid #3B82F6;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid #3B82F6;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Button Enhancements */
+.btn {
+  @apply inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-all duration-200;
+  @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+}
+
+.btn-primary {
+  @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500;
+}
+
+.btn-secondary {
+  @apply bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500;
+}
+
+.btn-success {
+  @apply bg-green-600 text-white hover:bg-green-700 focus:ring-green-500;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+/* Card Enhancements */
+.card {
+  @apply bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden;
+  transition: all var(--transition-duration);
+}
+
+.card:hover {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.card-header {
+  @apply px-6 py-4 border-b border-gray-200 bg-gray-50;
+}
+
+.card-body {
+  @apply p-6;
+}
+
+.card-footer {
+  @apply px-6 py-4 border-t border-gray-200 bg-gray-50;
+}
+
+/* Progress Indicators */
+.progress-ring {
+  width: 120px;
+  height: 120px;
+  position: relative;
+}
+
+.progress-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.progress-ring-circle {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease-in-out;
+}
+
+.progress-ring-bg {
+  stroke: #e5e7eb;
+}
+
+.progress-ring-progress {
+  stroke: url(#gradient);
+}
+
+/* Health Score Visualization */
+.health-score-meter {
+  position: relative;
+  width: 200px;
+  height: 100px;
+  overflow: hidden;
+}
+
+.health-score-arc {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  border: 20px solid;
+  border-bottom-color: transparent;
+  border-left-color: transparent;
+  top: 0;
+  left: 0;
+}
+
+.health-score-needle {
+  position: absolute;
+  width: 2px;
+  height: 80px;
+  background: #374151;
+  bottom: 0;
+  left: 50%;
+  transform-origin: bottom;
+  transition: transform 1s ease-in-out;
+}
+
+/* Risk Level Colors */
+.risk-low {
+  @apply text-green-600 bg-green-50 border-green-200;
+}
+
+.risk-moderate {
+  @apply text-yellow-600 bg-yellow-50 border-yellow-200;
+}
+
+.risk-high {
+  @apply text-orange-600 bg-orange-50 border-orange-200;
+}
+
+.risk-very-high {
+  @apply text-red-600 bg-red-50 border-red-200;
+}
+
+/* Chart Container */
+.chart-container {
+  position: relative;
+  height: 300px;
+  margin: 20px 0;
+}
+
+.chart-container canvas {
+  max-height: 100%;
+}
+
+/* Achievement Badges */
+.achievement-badge {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium;
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: #8B4513;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.achievement-badge.new {
+  animation: achievementPulse 2s infinite;
+}
+
+@keyframes achievementPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* Streak Counter */
+.streak-counter {
+  position: relative;
+  display: inline-block;
+}
+
+.streak-flame {
+  font-size: 2rem;
+  animation: flicker 2s infinite alternate;
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(0.95); }
+}
+
+/* Health Task Progress */
+.task-progress-bar {
+  height: 8px;
+  background: linear-gradient(90deg, #10B981, #3B82F6);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.task-progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: shine 2s infinite;
+}
+
+@keyframes shine {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Floating Action Button */
+.fab {
+  @apply fixed bottom-6 right-6 w-14 h-14 rounded-full shadow-lg;
+  @apply flex items-center justify-center text-white;
+  @apply transition-all duration-300 transform hover:scale-110;
+  background: linear-gradient(135deg, var(--primary-blue), var(--wellness-green));
+  z-index: 40;
+}
+
+.fab:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* Modal Enhancements */
+.modal-backdrop {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Toast Notifications */
+.toast {
+  animation: toastSlideIn 0.3s ease-out;
+}
+
+@keyframes toastSlideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Loading Animations */
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.loading-dots::after {
+  content: '';
+  animation: dots 1.5s steps(5, end) infinite;
+}
+
+@keyframes dots {
+  0%, 20% { content: ''; }
+  40% { content: '.'; }
+  60% { content: '..'; }
+  80%, 100% { content: '...'; }
+}
+
+/* Responsive Design Helpers */
+@media (max-width: 768px) {
+  .mobile-stack {
+    @apply flex-col space-y-4 space-x-0;
+  }
+  
+  .mobile-full {
+    @apply w-full;
+  }
+  
+  .mobile-hidden {
+    @apply hidden;
+  }
+  
+  .mobile-text-sm {
+    @apply text-sm;
+  }
+  
+  /* Adjust glassmorphism for mobile performance */
+  .glassmorphism {
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .glassmorphism {
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid #000000;
+  }
+  
+  .dark .glassmorphism {
+    background: rgba(0, 0, 0, 0.95);
+    border: 2px solid #ffffff;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .glassmorphism {
+    background: white !important;
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+  }
+  
+  body {
+    background: white !important;
+  }
+  
+  .card:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+}
+
+/* Dark mode adjustments */
+.dark {
+  color-scheme: dark;
+}
+
+.dark body {
+  @apply bg-gray-900 text-gray-100;
+  background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
+}
+
+.dark .card {
+  @apply bg-gray-800 border-gray-700;
+}
+
+.dark .card-header {
+  @apply bg-gray-700 border-gray-600;
+}
+
+.dark .card-footer {
+  @apply bg-gray-700 border-gray-600;
+}
+
+.dark .form-input {
+  @apply bg-gray-800 border-gray-600 text-gray-100;
+}
+
+.dark .form-input:focus {
+  @apply border-blue-400 ring-blue-400;
+}
+
+/* Custom utility classes */
+.text-gradient {
+  background: linear-gradient(135deg, var(--primary-blue), var(--wellness-green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.border-gradient {
+  border-image: linear-gradient(135deg, var(--primary-blue), var(--wellness-green)) 1;
+}
+
+.shadow-colored {
+  box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.15);
+}
+
+.shadow-colored-lg {
+  box-shadow: 0 10px 25px -3px rgba(59, 130, 246, 0.1), 0 4px 6px -2px rgba(59, 130, 246, 0.05);
+}
