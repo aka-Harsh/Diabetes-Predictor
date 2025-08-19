@@ -1,4 +1,13 @@
+Flask
+Flask-CORS
 pandas
+numpy
 scikit-learn
-flask
+xgboost
 joblib
+python-dotenv
+requests
+sqlite3
+matplotlib
+seaborn
+plotly
